@@ -31,6 +31,15 @@
         box-shadow: 0px 3px 1px -2px rgb(0 0 0 / 20%),
         0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%);
       }
+      .copy-btn {
+        margin-right: 8px;
+      }
+      .show-btn {
+        margin-bottom: 8px;
+      }
+      hr {
+        margin: 4px;
+      }
       footer {
         flex-shrink: 0;
         box-shadow: 0px 3px 1px -2px rgb(0 0 0 / 20%),
@@ -81,21 +90,18 @@
               </p>
             </div>
             <div>
-              <h2>Schema Description</h2>
-              <p id="schema-description">
-                "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
-                doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore
-                veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim
-                ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia
-                consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque
-                porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur,
-                adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore
-                et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis
-                nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid
-                ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea
-                voluptate velit esse quam nihil molestiae consequatur, vel illum qui
-                dolorem eum fugiat quo voluptas nulla pariatur?"
-              </p>
+              <h2>
+                Schema Description
+                <button id="show-schema-description-btn" class="btn btn-default btn-sm show-btn" onclick="toggleSchemaDescription()">Show</button>
+              </h2>
+              <p id="schema-description" style="display: none"></p>
+            </div>
+            <div>
+              <h2>
+                Schema
+                <button id="show-schema-btn" class="btn btn-default btn-sm show-btn" onclick="toggleServiceSchema()">Show</button>
+              </h2>
+              <p id="service-schema" style="display: none"></p>
             </div>
           </div>
         </div>
@@ -118,5 +124,76 @@
       integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
       crossorigin="anonymous"
     ></script>
+    <script>
+      const cleanUpUrl = url => {
+        return url.replace(/(http|https):\/\//, '')
+                  .replace(/.cioty.com/, '');
+      }
+      const url = window.location.href;
+      const domainService = cleanUpUrl(url);
+
+      const schemaDescriptionElement = document.querySelector('#schema-description');
+      const schemaDescriptionContent = schemaDescriptionElement.innerHtml;
+      const dataElementWithDescriptionArray = schemaDescriptionContent.match(/^#.+$/gm);
+      
+      const updatedSchemaDescriptionArray = dataElementWithDescriptionArray.map(str => {
+        const dataElement = str.match(/#\w+/g).join('');
+        const domainServiceElement = domainService.replace(/\/$/, dataElement);
+        const link = `@${domainServiceElement}@`;
+        const copyToClipboardBtn = `<button onclick="copyToClipboard('${link}')" class="copy-btn btn btn-xs btn-primary">Copy link</button>`;
+        const dataElementStrong = str.replace(/#\w+/g, `<strong>${dataElement.toUpperCase()}</strong>`)
+        const addBtnToString = copyToClipboardBtn.concat(dataElementStrong);
+        const stringWithLineBreak = `${addBtnToString}<br><hr />`;
+        return stringWithLineBreak;
+      });
+
+      const updatedSchemaDescription = updatedSchemaDescriptionArray.join('');
+      schemaDescriptionElement.innerHTML = updatedSchemaDescription;
+
+      const copyToClipboard = str => {
+        const el = document.createElement('textarea');
+        el.value = str;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+      }
+
+      const dataElements = schemaDescriptionContent.match(/#\w+/g);
+      const elementsTags = dataElements.map(str => {
+        const elementName = str.replace(/#/, '').toUpperCase();
+        return `&lt;${elementName}&gt;&lt;/${elementName}&gt;<br>`;
+      });
+
+      const elementsTagsString = elementsTags.join('');
+      const serviceSchema = `&lt;RTW&gt;<br>${elementsTagsString}&lt;/RTW&gt;`;
+
+      const serviceSchemaElement = document.querySelector('#service-schema');
+      serviceSchemaElement.innerHTML = serviceSchema;
+
+      const toggleSchemaDescription = () => {
+        const schemaDescription = document.querySelector('#schema-description');
+        const showSchemaDescriptionBtn = document.querySelector('#show-schema-description-btn');
+        if (schemaDescription.style.display === "none") {
+          schemaDescription.style.display = "block";
+          showSchemaDescriptionBtn.innerHTML = "Hide";
+        } else {
+          schemaDescription.style.display = "none";
+          showSchemaDescriptionBtn.innerHTML = "Show";
+        }
+      }
+
+      const toggleServiceSchema = () => {
+        const serviceSchema = document.querySelector('#service-schema');
+        const showSchemaBtn = document.querySelector('#show-schema-btn');
+        if (serviceSchema.style.display === "none") {
+          serviceSchema.style.display = "block";
+          showSchemaBtn.innerHTML = "Hide";
+        } else {
+          serviceSchema.style.display = "none";
+          showSchemaBtn.innerHTML = "Show";
+        }
+      }
+    </script>
   </body>
 </html>
