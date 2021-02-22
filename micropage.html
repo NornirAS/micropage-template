@@ -130,7 +130,7 @@
         const updatedSchemaDescriptionArray = dataElementWithDescriptionArray.map(str => {
           const dataElement = str.match(/#\w+/g).join('');
           const dataElementUpper = dataElement.toUpperCase();
-          const domainServiceElement = domainService.replace(/\/$/, dataElement);
+          const domainServiceElement = domainService.concat(dataElement);
           const link = '@' + domainServiceElement + '@';
           const copyToClipboardBtn = '<button onclick="copyToClipboard(' + "'" + link + "'" + ')" class="copy-btn btn btn-xs btn-primary">Copy link</button>';
           const dataElementStrong = str.replace(/#\w+/g, '<strong>' + dataElementUpper + '</strong>');
