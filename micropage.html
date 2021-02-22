@@ -74,34 +74,23 @@
           <div class="col-xs-12 col-md-7">
             <div>
               <h1>Description</h1>
-              <p id="service-description">
-                "Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium
-                doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore
-                veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim
-                ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia
-                consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Neque
-                porro quisquam est, qui dolorem ipsum quia dolor sit amet, consectetur,
-                adipisci velit, sed quia non numquam eius modi tempora incidunt ut labore
-                et dolore magnam aliquam quaerat voluptatem. Ut enim ad minima veniam, quis
-                nostrum exercitationem ullam corporis suscipit laboriosam, nisi ut aliquid
-                ex ea commodi consequatur? Quis autem vel eum iure reprehenderit qui in ea
-                voluptate velit esse quam nihil molestiae consequatur, vel illum qui
-                dolorem eum fugiat quo voluptas nulla pariatur?"
-              </p>
+              <p id="service-description"></p>
             </div>
-            <div>
-              <h2>
-                Schema Description
-                <button id="show-schema-description-btn" class="btn btn-default btn-sm show-btn" onclick="toggleSchemaDescription()">Show</button>
-              </h2>
-              <p id="schema-description" style="display: none"></p>
-            </div>
-            <div>
-              <h2>
-                Schema
-                <button id="show-schema-btn" class="btn btn-default btn-sm show-btn" onclick="toggleServiceSchema()">Show</button>
-              </h2>
-              <p id="service-schema" style="display: none"></p>
+            <div id="schema-description-section">
+              <div>
+                <h2>
+                  Schema Description
+                  <button id="show-schema-description-btn" class="btn btn-default btn-sm show-btn" onclick="toggleSchemaDescription()">Show</button>
+                </h2>
+                <p id="schema-description" style="display: none"></p>
+              </div>
+              <div>
+                <h2>
+                  Schema
+                  <button id="show-schema-btn" class="btn btn-default btn-sm show-btn" onclick="toggleServiceSchema()">Show</button>
+                </h2>
+                <p id="service-schema" style="display: none"></p>
+              </div>
             </div>
           </div>
         </div>
@@ -111,7 +100,7 @@
       <p class="text-center" style="margin: 0; padding: 16px 0">
         Powered by
         <img
-          src="https://previews.dropbox.com/p/thumb/ABE7N59-_MwFKBKec6TbHW9v_lO14YyRlZITN3wss7q6qkGobJTKIuGSImSDjjGpJURARo6EXE32ky2l4TNgZ0Z2iCoerxf_rRG72bktIt3ERhTHhfgPoyaaMTc-NDlL2DD5NWGg3yqNGIB-lqXZHm03AD1tYItOJtHuhQtwlMXM4sHSMgySo5q6jODYPuZ1bcaMBZESCbkX62ZOT1p4H_Wc-XbNXAHveKEn75qt5OgYhIod6ihSMs4zKk2al7iukGOKucpZFAxmlpJtgFWX9tyfvBzYrGrJ2VAUnjlroTCNT5Z1_cyaJWQGQDSzIX9k-fBiUKBnP1R3VPSiOP1kvHNUiyKGxDhAyUUmsO5SVJRhPQ/p.png?fv_content=true&size_mode=5"
+          src="https://i.imgur.com/LeIvwx2.png"
           height="20px"
           alt="Synx Hive logo"
         >
@@ -133,45 +122,55 @@
       const domainService = cleanUpUrl(url);
 
       const schemaDescriptionElement = document.querySelector('#schema-description');
-      const schemaDescriptionContent = schemaDescriptionElement.innerHtml;
+      const schemaDescriptionContent = schemaDescriptionElement.innerHTML;
       const dataElementWithDescriptionArray = schemaDescriptionContent.match(/^#.+$/gm);
-      
-      const updatedSchemaDescriptionArray = dataElementWithDescriptionArray.map(str => {
-        const dataElement = str.match(/#\w+/g).join('');
-        const domainServiceElement = domainService.replace(/\/$/, dataElement);
-        const link = `@${domainServiceElement}@`;
-        const copyToClipboardBtn = `<button onclick="copyToClipboard('${link}')" class="copy-btn btn btn-xs btn-primary">Copy link</button>`;
-        const dataElementStrong = str.replace(/#\w+/g, `<strong>${dataElement.toUpperCase()}</strong>`)
-        const addBtnToString = copyToClipboardBtn.concat(dataElementStrong);
-        const stringWithLineBreak = `${addBtnToString}<br><hr />`;
-        return stringWithLineBreak;
-      });
+      const schemaDescriptionSection= document.querySelector("#schema-description-section");
 
-      const updatedSchemaDescription = updatedSchemaDescriptionArray.join('');
-      schemaDescriptionElement.innerHTML = updatedSchemaDescription;
+      if (dataElementWithDescriptionArray !== null) {
+        const updatedSchemaDescriptionArray = dataElementWithDescriptionArray.map(str => {
+          const dataElement = str.match(/#\w+/g).join('');
+          const dataElementUpper = dataElement.toUpperCase();
+          const domainServiceElement = domainService.replace(/\/$/, dataElement);
+          const link = '@' + domainServiceElement + '@';
+          const copyToClipboardBtn = '<button onclick="copyToClipboard(' + "'" + link + "'" + ')" class="copy-btn btn btn-xs btn-primary">Copy link</button>';
+          const dataElementStrong = str.replace(/#\w+/g, '<strong>' + dataElementUpper + '</strong>');
+          const addBtnToString = copyToClipboardBtn.concat(dataElementStrong);
+          const stringWithLineBreak = addBtnToString + '<br><hr />';
+          return stringWithLineBreak;
+        });
+        const updatedSchemaDescription = updatedSchemaDescriptionArray.join('');
+        schemaDescriptionElement.innerHTML = updatedSchemaDescription;
+      } else {
+        schemaDescriptionSection.style.display = 'none'
+        schemaDescriptionElement.innerHTML = '';
+      };
 
-      const copyToClipboard = str => {
+      function copyToClipboard(str) {
         const el = document.createElement('textarea');
         el.value = str;
         document.body.appendChild(el);
         el.select();
         document.execCommand('copy');
         document.body.removeChild(el);
-      }
-
-      const dataElements = schemaDescriptionContent.match(/#\w+/g);
-      const elementsTags = dataElements.map(str => {
-        const elementName = str.replace(/#/, '').toUpperCase();
-        return `&lt;${elementName}&gt;&lt;/${elementName}&gt;<br>`;
-      });
-
-      const elementsTagsString = elementsTags.join('');
-      const serviceSchema = `&lt;RTW&gt;<br>${elementsTagsString}&lt;/RTW&gt;`;
+      };
 
       const serviceSchemaElement = document.querySelector('#service-schema');
-      serviceSchemaElement.innerHTML = serviceSchema;
+      const dataElements = schemaDescriptionContent.match(/#\w+/g);
+      if (dataElements !== null) {
+        const elementsTags = dataElements.map(str => {
+          const elementName = str.replace(/#/, '').toUpperCase();
+          return '&lt;' + elementName + '&gt;&lt;/' + elementName + '&gt;<br>';
+        });
 
-      const toggleSchemaDescription = () => {
+        const elementsTagsString = elementsTags.join('');
+        const serviceSchema = '&lt;RTW&gt;<br>' + elementsTagsString + '&lt;/RTW&gt;';
+
+        serviceSchemaElement.innerHTML = serviceSchema;
+      } else {
+        serviceSchemaElement.innerHTML = '';
+      };
+
+      function toggleSchemaDescription() {
         const schemaDescription = document.querySelector('#schema-description');
         const showSchemaDescriptionBtn = document.querySelector('#show-schema-description-btn');
         if (schemaDescription.style.display === "none") {
@@ -180,10 +179,10 @@
         } else {
           schemaDescription.style.display = "none";
           showSchemaDescriptionBtn.innerHTML = "Show";
-        }
-      }
+        };
+      };
 
-      const toggleServiceSchema = () => {
+      function toggleServiceSchema() {
         const serviceSchema = document.querySelector('#service-schema');
         const showSchemaBtn = document.querySelector('#show-schema-btn');
         if (serviceSchema.style.display === "none") {
@@ -192,8 +191,8 @@
         } else {
           serviceSchema.style.display = "none";
           showSchemaBtn.innerHTML = "Show";
-        }
-      }
+        };
+      };
     </script>
   </body>
 </html>
