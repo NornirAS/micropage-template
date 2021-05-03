@@ -12,6 +12,7 @@
       crossorigin="anonymous"
     >
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&display=swap" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
     <style>
       html, body {
         height: 100%;
@@ -24,12 +25,60 @@
         flex-direction: column;
         background-color: #FAFEFE;
       }
-      .content {
-        flex: 1 0 auto;
+      p {
+        margin: 16px 8px;
+        font-size: 16px;
       }
-      .navbar {
-        box-shadow: 0px 3px 1px -2px rgb(0 0 0 / 20%),
-        0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%);
+      textarea {
+        margin: 16px 0;
+      }
+      textarea:focus {
+        border-color: #4f4c9c !important;
+      }
+      i {
+        color: #1bafab !important;
+        margin: 0 16px 0 8px;
+      }
+      i:hover{
+        color: #4f4c9c !important;
+      }
+      .mb-2 {
+        margin-bottom: 8px;
+      }
+      .mb-7 {
+        margin-bottom: 28px;
+      }
+      .bg-image {
+        height: 300px;
+        background-position: center;
+        background-size: cover;
+      }
+      .nav-buttons-group {
+        overflow: scroll;
+      }
+      .btn-group-justified {
+        table-layout: auto;
+      }
+      .btn-text {
+        background-color: transparent;
+        border: none;
+      }
+      .btn-group-lg>.btn {
+        margin-top: 16px;
+        padding: 12px 16px;
+        border-radius: 0;
+      }
+      .btn.active,
+      .btn.btn-text:hover,
+      .btn.btn-text:focus {
+        color: #1bafab !important;
+        font-size: 20px;
+        outline: 0;
+        box-shadow: none;
+      }
+      .content {
+        padding-top: 48px;
+        flex: 1 0 auto;
       }
       .copy-btn {
         margin-right: 8px;
@@ -39,6 +88,7 @@
       }
       hr {
         margin: 4px;
+        border-top: 2px solid #1bafab;
       }
       footer {
         flex-shrink: 0;
@@ -56,42 +106,40 @@
   </head>
   <body>
     <div class="content">
-      <nav class="navbar">
-        <div class="container-fluid">
-          <h1 class="text-center">Service Name</h1>
-        </div>
-      </nav>
       <div class="container">
         <div class="row">
-          <div class="col-xs-12 col-md-5">
+          <div class="col-xs-12 col-md-2">
             <img
-              id="service-image"
-              src="https://static.toiimg.com/photo/72975551.cms"
-              class="img-responsive"
-              alt="Service image"
+              src="https://i.imgur.com/3Ir4cHk.png"
+              width="100px"
+              height="100px"
+              alt="Synx Hive logo"
             >
           </div>
-          <div class="col-xs-12 col-md-7">
-            <div>
-              <h1>Description</h1>
-              <p id="service-description"></p>
-            </div>
-            <div id="schema-description-section">
-              <div>
-                <h2>
-                  Schema Description
-                  <button id="show-schema-description-btn" class="btn btn-default btn-sm show-btn" onclick="toggleSchemaDescription()">Show</button>
-                </h2>
-                <p id="schema-description" style="display: none"></p>
+          <div class="col-xs-12 col-md-8">
+            <div class="bg-image" style="background-image:url({{image}});"></div>
+          </div>
+          <div class="col-xs-12 col-md-8 col-md-offset-2">
+            <h1 class="text-center">Service name</h1>
+          </div>
+          <div class="col-xs-12 col-md-8 col-md-offset-2 nav-buttons-group">
+            <div class="btn-group btn-group-justified" role="group" aria-label="...">
+              <div class="btn-group btn-group-lg" role="group">
+                <button type="button" class="btn btn-text active"><strong>Description</strong></button>
               </div>
-              <div>
-                <h2>
-                  Schema
-                  <button id="show-schema-btn" class="btn btn-default btn-sm show-btn" onclick="toggleServiceSchema()">Show</button>
-                </h2>
-                <p id="service-schema" style="display: none"></p>
+              <div class="btn-group btn-group-lg" role="group">
+                <button type="button" class="btn btn-text">Data Resources</button>
+              </div>
+              <div class="btn-group btn-group-lg" role="group">
+                <button type="button" class="btn btn-text">Command Resources</button>
               </div>
             </div>
+          </div>
+          <div class="col-xs-12 col-md-8 col-md-offset-2"><hr /></div>
+          <div class="col-xs-12 col-md-8 col-md-offset-2">
+            <p id="service-description">{{description}}</p>
+            <p id="schema-description" style="display: none">{{schema}}</p>
+            <p id="command-description" style="display: none">{{command}}</p>
           </div>
         </div>
       </div>
@@ -114,36 +162,90 @@
       crossorigin="anonymous"
     ></script>
     <script>
+      const navButtons = document.querySelectorAll('.btn-text');
+      const currentActive = document.getElementsByClassName('active');
+      const serviceDescriptionElement = document.querySelector('#service-description');
+      const schemaDescriptionElement = document.querySelector('#schema-description');
+      const commandDescriptionElement = document.querySelector('#command-description');
+
+      /** 
+       * Add or remove 'Active' class to/from nav buttons.
+       * Show/hide content depends on selected button.
+      */
+      navButtons.forEach((btn, i) => {
+        btn.addEventListener("click", () => {
+          currentActive[0].classList.remove("active");
+          btn.classList.add("active");
+          if (i === 0) {
+            serviceDescriptionElement.style.display = "block";
+            schemaDescriptionElement.style.display = "none";
+            commandDescriptionElement.style.display = "none";
+          } else if (i === 1) {
+            serviceDescriptionElement.style.display = "none";
+            schemaDescriptionElement.style.display = "block";
+            commandDescriptionElement.style.display = "none";
+          } else {
+            serviceDescriptionElement.style.display = "none";
+            schemaDescriptionElement.style.display = "none";
+            commandDescriptionElement.style.display = "block";
+          }
+        });
+      });
+
+      // Return subdomain/service from url
       const cleanUpUrl = url => {
-        return url.replace(/(http|https):\/\//, '')
-                  .replace(/.cioty.com/, '');
-      }
+        return url.replace(/(http|https):\/\//, "")
+                  .replace(/.cioty.com/, "");
+      };
       const url = window.location.href;
       const domainService = cleanUpUrl(url);
 
-      const schemaDescriptionElement = document.querySelector('#schema-description');
       const schemaDescriptionContent = schemaDescriptionElement.innerHTML;
-      const dataElementWithDescriptionArray = schemaDescriptionContent.match(/^#.+$/gm);
-      const schemaDescriptionSection= document.querySelector("#schema-description-section");
+      const commandDescriptionContent = commandDescriptionElement.innerHTML;
+      const validSchemaDescription = schemaDescriptionContent.match(/^#.+$/gm);
+      const validCommandDescription = commandDescriptionContent.match(/^#.+$/gm);
 
-      if (dataElementWithDescriptionArray !== null) {
-        const updatedSchemaDescriptionArray = dataElementWithDescriptionArray.map(str => {
-          const dataElement = str.match(/#\w+/g).join('');
-          const dataElementUpper = dataElement.toUpperCase();
-          const domainServiceElement = domainService.concat(dataElement);
-          const link = '@' + domainServiceElement + '@';
-          const copyToClipboardBtn = '<button onclick="copyToClipboard(' + "'" + link + "'" + ')" class="copy-btn btn btn-xs btn-primary">Copy link</button>';
-          const dataElementStrong = str.replace(/#\w+/g, '<strong>' + dataElementUpper + '</strong>');
-          const addBtnToString = copyToClipboardBtn.concat(dataElementStrong);
-          const stringWithLineBreak = addBtnToString + '<br><hr />';
-          return stringWithLineBreak;
-        });
-        const updatedSchemaDescription = updatedSchemaDescriptionArray.join('');
-        schemaDescriptionElement.innerHTML = updatedSchemaDescription;
+      if (validSchemaDescription !== null) {
+        schemaDescriptionElement.innerHTML = validSchemaDescription.map(str => {
+          const elementName = str.match(/#\w+/g).join('');
+          const elementDescription = str.replace(/#\w+/g, '');
+          // Get link @subdomain/service#element@ format
+          const link = '@' + domainService.concat(elementName) + '@';
+          // Create icon element and add it before #element
+          const copyIcon = '<i class="far fa-copy" link="' + link + '" data-placement="left" title="Copied!"></i>';
+          const copyElementDiv = '<div class="mb-2">' + copyIcon + '<strong>' + link.toUpperCase() + '</strong></div>';
+          const elementDescriptionDiv = '<div>' + elementDescription + '</div>';
+          return '<div class="mb-7">' + copyElementDiv.concat(elementDescriptionDiv) + '</div>';
+        }).join('');
       } else {
-        schemaDescriptionSection.style.display = 'none'
         schemaDescriptionElement.innerHTML = '';
       };
+
+      if (validCommandDescription !== null) {
+        const command = validCommandDescription.map(str => {
+          const elementName = str.match(/#\w+/g).join('').replace(/#/g, '');
+          const elementDescription = str.replace(/#\w+/g, '');
+          // Create icon element and add it before #element
+          const copyIcon = '<i class="far fa-copy" link="' + elementName + '" data-placement="left" title="Copied!"></i>';
+          const copyElementDiv = '<div class="mb-2">' + copyIcon + '<strong>' + elementName.toUpperCase() + '</strong></div>';
+          const elementDescriptionDiv = '<div>' + elementDescription + '</div>';
+          return '<div class="mb-7">' + copyElementDiv.concat(elementDescriptionDiv) + '</div>';
+        });
+        command.unshift('<h3>Command</h3>');
+        command.splice(2, 0, '<h3>Parameters</h3>');
+        commandDescriptionElement.innerHTML = command.join('');
+      } else {
+        commandDescriptionElement.innerHTML = '';
+      };
+
+      // Assign event on click "copy"
+      const copyIcons = document.querySelectorAll('i');
+      copyIcons.forEach(icon => {
+        icon.addEventListener('click', () => {
+          copyToClipboard(icon.getAttribute('link'));
+          $(icon).tooltip('show');
+        })
+      })
 
       function copyToClipboard(str) {
         const el = document.createElement('textarea');
@@ -152,46 +254,6 @@
         el.select();
         document.execCommand('copy');
         document.body.removeChild(el);
-      };
-
-      const serviceSchemaElement = document.querySelector('#service-schema');
-      const dataElements = schemaDescriptionContent.match(/#\w+/g);
-      if (dataElements !== null) {
-        const elementsTags = dataElements.map(str => {
-          const elementName = str.replace(/#/, '').toUpperCase();
-          return '&lt;' + elementName + '&gt;&lt;/' + elementName + '&gt;<br>';
-        });
-
-        const elementsTagsString = elementsTags.join('');
-        const serviceSchema = '&lt;RTW&gt;<br>' + elementsTagsString + '&lt;/RTW&gt;';
-
-        serviceSchemaElement.innerHTML = serviceSchema;
-      } else {
-        serviceSchemaElement.innerHTML = '';
-      };
-
-      function toggleSchemaDescription() {
-        const schemaDescription = document.querySelector('#schema-description');
-        const showSchemaDescriptionBtn = document.querySelector('#show-schema-description-btn');
-        if (schemaDescription.style.display === "none") {
-          schemaDescription.style.display = "block";
-          showSchemaDescriptionBtn.innerHTML = "Hide";
-        } else {
-          schemaDescription.style.display = "none";
-          showSchemaDescriptionBtn.innerHTML = "Show";
-        };
-      };
-
-      function toggleServiceSchema() {
-        const serviceSchema = document.querySelector('#service-schema');
-        const showSchemaBtn = document.querySelector('#show-schema-btn');
-        if (serviceSchema.style.display === "none") {
-          serviceSchema.style.display = "block";
-          showSchemaBtn.innerHTML = "Hide";
-        } else {
-          serviceSchema.style.display = "none";
-          showSchemaBtn.innerHTML = "Show";
-        };
       };
     </script>
   </body>
