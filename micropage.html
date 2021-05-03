@@ -136,11 +136,15 @@
           <div class="col-xs-12 col-md-8 col-md-offset-2"><hr /></div>
           <div class="col-xs-12 col-md-8 col-md-offset-2">
             <p id="service-description">{{description}}</p>
-            <p id="schema-description" style="display: none">{{schema}}</p>
-            <p id="command-description" style="display: none">{{command}}</p>
+            <p id="schema-description" style="display: none"></p>
+            <p id="command-description" style="display: none"></p>
           </div>
         </div>
       </div>
+    </div>
+    <div class="row">
+      <p id="schema-string" style="display: none">{{schema}}</p>
+      <p id="command-string" style="display: none">{{command}}</p>
     </div>
     <footer>
       <p class="text-center" style="margin: 0; padding: 16px 0">
@@ -190,6 +194,21 @@
         });
       });
 
+      // remove this.on production
+      const schemaDescriptionObject = {
+        description: "Some description for elements",
+        elementDescription: [
+          {
+            name: "text",
+            description: "text description"
+          },
+          {
+            name: "data",
+            description: "data element description DATA"
+          }
+        ]
+      };
+
       // Return subdomain/service from url
       const cleanUpUrl = url => {
         return url.replace(/(http|https):\/\//, "")
@@ -197,44 +216,48 @@
       };
       const url = window.location.href;
       const domainService = cleanUpUrl(url);
+      
+      const schemaString = document.querySelector("#schema-string");
+      // remove this on production
+      schemaString.innerHTML = JSON.stringify(schemaDescriptionObject);
+      const json = JSON.parse(schemaString.innerHTML)
 
-      const schemaDescriptionContent = schemaDescriptionElement.innerHTML;
-      const commandDescriptionContent = commandDescriptionElement.innerHTML;
-      const validSchemaDescription = schemaDescriptionContent.match(/^#.+$/gm);
-      const validCommandDescription = commandDescriptionContent.match(/^#.+$/gm);
+      // Create html element for schema description
+      const schemaDescription = '<div class="mb-7">' + json.description + '</div>';
 
-      if (validSchemaDescription !== null) {
-        schemaDescriptionElement.innerHTML = validSchemaDescription.map(str => {
-          const elementName = str.match(/#\w+/g).join('');
-          const elementDescription = str.replace(/#\w+/g, '');
-          // Get link @subdomain/service#element@ format
-          const link = '@' + domainService.concat(elementName) + '@';
-          // Create icon element and add it before #element
-          const copyIcon = '<i class="far fa-copy" link="' + link + '" data-placement="left" title="Copied!"></i>';
-          const copyElementDiv = '<div class="mb-2">' + copyIcon + '<strong>' + link.toUpperCase() + '</strong></div>';
-          const elementDescriptionDiv = '<div>' + elementDescription + '</div>';
-          return '<div class="mb-7">' + copyElementDiv.concat(elementDescriptionDiv) + '</div>';
-        }).join('');
-      } else {
-        schemaDescriptionElement.innerHTML = '';
-      };
+      /**
+       * Create html element for each presented schema element.
+       * Each element can be copiead to clipboard.
+       */
+      const schemaElementDescriptionArray = json.elementDescription.map(element => {
+        const link = '@' + domainService + '#' + element.name + '@';
+        const copyIcon = '<i class="far fa-copy" link="' + link + '" data-placement="left" title="Copied!"></i>';
+        const copyElementDiv = '<div class="mb-2">' + copyIcon + '<strong>' + link.toUpperCase() + '</strong></div>';
+        const elementDescriptionDiv = '<div>' + element.description + '</div>';
+        return '<div class="mb-7">' + copyElementDiv.concat(elementDescriptionDiv) + '</div>';
+      }).join('');
 
-      if (validCommandDescription !== null) {
-        const command = validCommandDescription.map(str => {
-          const elementName = str.match(/#\w+/g).join('').replace(/#/g, '');
-          const elementDescription = str.replace(/#\w+/g, '');
-          // Create icon element and add it before #element
-          const copyIcon = '<i class="far fa-copy" link="' + elementName + '" data-placement="left" title="Copied!"></i>';
-          const copyElementDiv = '<div class="mb-2">' + copyIcon + '<strong>' + elementName.toUpperCase() + '</strong></div>';
-          const elementDescriptionDiv = '<div>' + elementDescription + '</div>';
-          return '<div class="mb-7">' + copyElementDiv.concat(elementDescriptionDiv) + '</div>';
-        });
-        command.unshift('<h3>Command</h3>');
-        command.splice(2, 0, '<h3>Parameters</h3>');
-        commandDescriptionElement.innerHTML = command.join('');
-      } else {
-        commandDescriptionElement.innerHTML = '';
-      };
+      schemaDescriptionElement.innerHTML = schemaDescription.concat(schemaElementDescriptionArray);
+
+      // const commandDescriptionContent = commandDescriptionElement.innerHTML;
+      // const validCommandDescription = commandDescriptionContent.match(/^#.+$/gm);
+
+      // if (validCommandDescription !== null) {
+      //   const command = validCommandDescription.map(str => {
+      //     const elementName = str.match(/#\w+/g).join('').replace(/#/g, '');
+      //     const elementDescription = str.replace(/#\w+/g, '');
+      //     // Create icon element and add it before #element
+      //     const copyIcon = '<i class="far fa-copy" link="' + elementName + '" data-placement="left" title="Copied!"></i>';
+      //     const copyElementDiv = '<div class="mb-2">' + copyIcon + '<strong>' + elementName.toUpperCase() + '</strong></div>';
+      //     const elementDescriptionDiv = '<div>' + elementDescription + '</div>';
+      //     return '<div class="mb-7">' + copyElementDiv.concat(elementDescriptionDiv) + '</div>';
+      //   });
+      //   command.unshift('<h3>Command</h3>');
+      //   command.splice(2, 0, '<h3>Parameters</h3>');
+      //   commandDescriptionElement.innerHTML = command.join('');
+      // } else {
+      //   commandDescriptionElement.innerHTML = '';
+      // };
 
       // Assign event on click "copy"
       const copyIcons = document.querySelectorAll('i');

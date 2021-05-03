@@ -8,6 +8,6 @@ app.listen(5000, () => {
   console.log('app running on port 5000')
 });
 
-app.get('/', (req, res) => {
+app.get('/test', (req, res) => {
   res.sendFile(path.join(__dirname + '/micropage.html'));
 })
