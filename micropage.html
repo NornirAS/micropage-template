@@ -29,29 +29,34 @@
         margin: 16px 8px;
         font-size: 16px;
       }
-      textarea {
-        margin: 16px 0;
+      thead {
+        background-color: #4f5f9c;
+        color: #ffffff;
       }
-      textarea:focus {
-        border-color: #4f4c9c !important;
+      .table-striped>tbody>tr:nth-of-type(even) {
+        background-color: #d8e3ff;
       }
       i {
-        color: #1bafab !important;
+        color: #4f4c9c !important;
         margin: 0 16px 0 8px;
       }
       i:hover{
-        color: #4f4c9c !important;
+        color: #d8e3ff !important;
+      }
+      .mt-6 {
+        margin-top: 24px;
       }
       .mb-2 {
         margin-bottom: 8px;
       }
-      .mb-7 {
-        margin-bottom: 28px;
+      .mb-6 {
+        margin-bottom: 24px;
       }
       .bg-image {
         height: 300px;
         background-position: center;
-        background-size: cover;
+        background-size: 300px;
+        background-repeat: no-repeat;
       }
       .nav-buttons-group {
         overflow: scroll;
@@ -62,6 +67,7 @@
       .btn-text {
         background-color: transparent;
         border: none;
+        border-bottom: 2px solid #4f4c9c;
       }
       .btn-group-lg>.btn {
         margin-top: 16px;
@@ -69,10 +75,15 @@
         border-radius: 0;
       }
       .btn.active,
-      .btn.btn-text:hover,
       .btn.btn-text:focus {
-        color: #1bafab !important;
-        font-size: 20px;
+        color: #ffffff !important;
+        background-color: #4f4c9c;
+        outline: 0;
+        box-shadow: none;
+      }
+      .btn.btn-text:hover {
+        color: #ffffff !important;
+        background-color: #4f5f9c;
         outline: 0;
         box-shadow: none;
       }
@@ -85,10 +96,6 @@
       }
       .show-btn {
         margin-bottom: 8px;
-      }
-      hr {
-        margin: 4px;
-        border-top: 2px solid #1bafab;
       }
       footer {
         flex-shrink: 0;
@@ -133,9 +140,8 @@
           </div>
         </div>
         <div class="row">
-          <div class="col-xs-12 col-md-8 col-md-offset-2"><hr /></div>
           <div class="col-xs-12 col-md-8 col-md-offset-2">
-            <p id="service-description">{{description}}</p>
+            <p id="service-description"></p>
             <p id="schema-description" style="display: none"></p>
             <p id="command-description" style="display: none"></p>
           </div>
@@ -143,6 +149,7 @@
       </div>
     </div>
     <div class="row">
+      <p id="description" style="display: none">{{description}}</p>
       <p id="schema-string" style="display: none">{{schema}}</p>
       <p id="command-string" style="display: none">{{command}}</p>
     </div>
@@ -194,6 +201,12 @@
         });
       });
 
+      // delete on production
+      const description = "some service description";
+      const descriptionString = document.querySelector("#description-string");
+      serviceDescriptionElement.innerHTML = '<div class="mt-6 mb-6">' + description + '</div>';
+      
+
       // remove this.on production
       const schemaDescriptionObject = {
         description: "Some description for elements",
@@ -224,7 +237,7 @@
       const schemaJson = JSON.parse(schemaString.innerHTML)
 
       // Create html element for schema description
-      const schemaDescription = '<div class="mb-7">' + schemaJson.description + '</div>';
+      const schemaDescription = '<div class="mt-6 mb-6">' + schemaJson.description + '</div>';
 
       /**
        * Create html element for each presented schema element.
@@ -235,7 +248,7 @@
         const copyIcon = '<i class="far fa-copy" link="' + link + '" data-placement="left" title="Copied!"></i>';
         const copyElementDiv = '<div class="mb-2">' + copyIcon + '<strong>' + link.toUpperCase() + '</strong></div>';
         const elementDescriptionDiv = '<div>' + element.description + '</div>';
-        return '<div class="mb-7">' + copyElementDiv.concat(elementDescriptionDiv) + '</div>';
+        return '<hr/><div>' + copyElementDiv.concat(elementDescriptionDiv) + '</div>';
       }).join('');
 
       schemaDescriptionElement.innerHTML = schemaDescription.concat(schemaElementDescriptionArray);
@@ -266,7 +279,7 @@
       commandString.innerHTML = JSON.stringify(commandDescriptionObject);
       const commandJson = JSON.parse(commandString.innerHTML)
 
-      const commandDescription = '<div class="mb-7">' + commandJson.description + '</div>';
+      const commandDescription = '<div class="mt-6 mb-6">' + commandJson.description + '</div>';
 
       const tableHead = commandJson.headers.map(header => {
         return '<th>' + header + '</th>';
@@ -279,7 +292,7 @@
         return '<tr>' + columns + '</tr>';
       }).join('');
 
-      const table = '<table class="table table-bordered"><thead><tr>' + tableHead + '</tr></thead><tbody>' + tableBody + '</tbody></table>';
+      const table = '<table class="table table-striped table-bordered"><thead><tr>' + tableHead + '</tr></thead><tbody>' + tableBody + '</tbody></table>';
       
       commandDescriptionElement.innerHTML = commandDescription.concat(table);
 
