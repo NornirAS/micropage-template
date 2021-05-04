@@ -197,7 +197,7 @@
       // remove this.on production
       const schemaDescriptionObject = {
         description: "Some description for elements",
-        elementDescription: [
+        elements: [
           {
             name: "text",
             description: "text description"
@@ -217,19 +217,20 @@
       const url = window.location.href;
       const domainService = cleanUpUrl(url);
       
+      // Hidden element which is storing data in JSON string.
       const schemaString = document.querySelector("#schema-string");
       // remove this on production
       schemaString.innerHTML = JSON.stringify(schemaDescriptionObject);
-      const json = JSON.parse(schemaString.innerHTML)
+      const schemaJson = JSON.parse(schemaString.innerHTML)
 
       // Create html element for schema description
-      const schemaDescription = '<div class="mb-7">' + json.description + '</div>';
+      const schemaDescription = '<div class="mb-7">' + schemaJson.description + '</div>';
 
       /**
        * Create html element for each presented schema element.
        * Each element can be copiead to clipboard.
        */
-      const schemaElementDescriptionArray = json.elementDescription.map(element => {
+      const schemaElementDescriptionArray = schemaJson.elements.map(element => {
         const link = '@' + domainService + '#' + element.name + '@';
         const copyIcon = '<i class="far fa-copy" link="' + link + '" data-placement="left" title="Copied!"></i>';
         const copyElementDiv = '<div class="mb-2">' + copyIcon + '<strong>' + link.toUpperCase() + '</strong></div>';
@@ -239,25 +240,48 @@
 
       schemaDescriptionElement.innerHTML = schemaDescription.concat(schemaElementDescriptionArray);
 
-      // const commandDescriptionContent = commandDescriptionElement.innerHTML;
-      // const validCommandDescription = commandDescriptionContent.match(/^#.+$/gm);
+      // remove this.on production
+      const commandDescriptionObject = {
+        description: "Some description for command Resoucs. Overal explanation of commands.",
+        headers: ["ACTION", "PARAM1", "PARAM2", "Description"],
+        commands: [
+          {
+            command: "ON",
+            param1: "ghostId",
+            param2: "(red, blue, green)",
+            description: "Turn on the lamp for ghostID with selected color",
+          },
+          {
+            command: "off",
+            param1: "ghostId",
+            param2: "",
+            description: "Turn off the lamp for ghostID",
+          }
+        ]
+      };
 
-      // if (validCommandDescription !== null) {
-      //   const command = validCommandDescription.map(str => {
-      //     const elementName = str.match(/#\w+/g).join('').replace(/#/g, '');
-      //     const elementDescription = str.replace(/#\w+/g, '');
-      //     // Create icon element and add it before #element
-      //     const copyIcon = '<i class="far fa-copy" link="' + elementName + '" data-placement="left" title="Copied!"></i>';
-      //     const copyElementDiv = '<div class="mb-2">' + copyIcon + '<strong>' + elementName.toUpperCase() + '</strong></div>';
-      //     const elementDescriptionDiv = '<div>' + elementDescription + '</div>';
-      //     return '<div class="mb-7">' + copyElementDiv.concat(elementDescriptionDiv) + '</div>';
-      //   });
-      //   command.unshift('<h3>Command</h3>');
-      //   command.splice(2, 0, '<h3>Parameters</h3>');
-      //   commandDescriptionElement.innerHTML = command.join('');
-      // } else {
-      //   commandDescriptionElement.innerHTML = '';
-      // };
+      // Hidden element which is storing data in JSON string.
+      const commandString = document.querySelector("#command-string");
+      // remove this on production
+      commandString.innerHTML = JSON.stringify(commandDescriptionObject);
+      const commandJson = JSON.parse(commandString.innerHTML)
+
+      const commandDescription = '<div class="mb-7">' + commandJson.description + '</div>';
+
+      const tableHead = commandJson.headers.map(header => {
+        return '<th>' + header + '</th>';
+      }).join('');
+
+      const tableBody = commandJson.commands.map(command => {
+        const columns = Object.values(command).map(item => {
+          return '<td>' + item + '</td>';
+        }).join('');
+        return '<tr>' + columns + '</tr>';
+      }).join('');
+
+      const table = '<table class="table table-bordered"><thead><tr>' + tableHead + '</tr></thead><tbody>' + tableBody + '</tbody></table>';
+      
+      commandDescriptionElement.innerHTML = commandDescription.concat(table);
 
       // Assign event on click "copy"
       const copyIcons = document.querySelectorAll('i');
