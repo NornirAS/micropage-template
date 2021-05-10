@@ -82,8 +82,8 @@
         box-shadow: none;
       }
       .btn.btn-text:hover {
-        color: #ffffff !important;
-        background-color: #4f5f9c;
+        color: #3C3C3C !important;
+        background-color: #d8e3ff;
         outline: 0;
         box-shadow: none;
       }
@@ -141,17 +141,12 @@
         </div>
         <div class="row">
           <div class="col-xs-12 col-md-8 col-md-offset-2">
-            <p id="service-description"></p>
-            <p id="schema-description" style="display: none"></p>
-            <p id="command-description" style="display: none"></p>
+            <p id="service-description">{{description}}</p>
+            <p id="schema-description" style="display: none">{{schema}}</p>
+            <p id="command-description" style="display: none">{{command}}</p>
           </div>
         </div>
       </div>
-    </div>
-    <div class="row">
-      <p id="description" style="display: none">{{description}}</p>
-      <p id="schema-string" style="display: none">{{schema}}</p>
-      <p id="command-string" style="display: none">{{command}}</p>
     </div>
     <footer>
       <p class="text-center" style="margin: 0; padding: 16px 0">
@@ -201,27 +196,9 @@
         });
       });
 
-      // delete on production
-      const description = "some service description";
-      const descriptionString = document.querySelector("#description-string");
-      serviceDescriptionElement.innerHTML = '<div class="mt-6 mb-6">' + description + '</div>';
+      const serviceDescription = serviceDescriptionElement.innerHTML;
+      serviceDescriptionElement.innerHTML = '<div class="mt-6 mb-6">' + serviceDescription + '</div>';
       
-
-      // remove this.on production
-      const schemaDescriptionObject = {
-        description: "Some description for elements",
-        elements: [
-          {
-            name: "text",
-            description: "text description"
-          },
-          {
-            name: "data",
-            description: "data element description DATA"
-          }
-        ]
-      };
-
       // Return subdomain/service from url
       const cleanUpUrl = url => {
         return url.replace(/(http|https):\/\//, "")
@@ -230,71 +207,60 @@
       const url = window.location.href;
       const domainService = cleanUpUrl(url);
       
-      // Hidden element which is storing data in JSON string.
-      const schemaString = document.querySelector("#schema-string");
-      // remove this on production
-      schemaString.innerHTML = JSON.stringify(schemaDescriptionObject);
-      const schemaJson = JSON.parse(schemaString.innerHTML)
+      // check if schema descriptin element content is JSON string
+      const schemaDescriptionString = schemaDescriptionElement.innerHTML;
+      const schemaDescriptionIsJsonString = isJsonString(schemaDescriptionString);
+      if (schemaDescriptionIsJsonString) {
+        const schemaDescriptionJson = JSON.parse(schemaDescriptionString);
+        
+        // Create html element for schema description
+        const schemaDescription = '<div class="mt-6 mb-6">' + schemaDescriptionJson.description + '</div>';
 
-      // Create html element for schema description
-      const schemaDescription = '<div class="mt-6 mb-6">' + schemaJson.description + '</div>';
-
-      /**
-       * Create html element for each presented schema element.
-       * Each element can be copiead to clipboard.
-       */
-      const schemaElementDescriptionArray = schemaJson.elements.map(element => {
-        const link = '@' + domainService + '#' + element.name + '@';
-        const copyIcon = '<i class="far fa-copy" link="' + link + '" data-placement="left" title="Copied!"></i>';
-        const copyElementDiv = '<div class="mb-2">' + copyIcon + '<strong>' + link.toUpperCase() + '</strong></div>';
-        const elementDescriptionDiv = '<div>' + element.description + '</div>';
-        return '<hr/><div>' + copyElementDiv.concat(elementDescriptionDiv) + '</div>';
-      }).join('');
-
-      schemaDescriptionElement.innerHTML = schemaDescription.concat(schemaElementDescriptionArray);
-
-      // remove this.on production
-      const commandDescriptionObject = {
-        description: "Some description for command Resoucs. Overal explanation of commands.",
-        headers: ["ACTION", "PARAM1", "PARAM2", "Description"],
-        commands: [
-          {
-            command: "ON",
-            param1: "ghostId",
-            param2: "(red, blue, green)",
-            description: "Turn on the lamp for ghostID with selected color",
-          },
-          {
-            command: "off",
-            param1: "ghostId",
-            param2: "",
-            description: "Turn off the lamp for ghostID",
-          }
-        ]
-      };
-
-      // Hidden element which is storing data in JSON string.
-      const commandString = document.querySelector("#command-string");
-      // remove this on production
-      commandString.innerHTML = JSON.stringify(commandDescriptionObject);
-      const commandJson = JSON.parse(commandString.innerHTML)
-
-      const commandDescription = '<div class="mt-6 mb-6">' + commandJson.description + '</div>';
-
-      const tableHead = commandJson.headers.map(header => {
-        return '<th>' + header + '</th>';
-      }).join('');
-
-      const tableBody = commandJson.commands.map(command => {
-        const columns = Object.values(command).map(item => {
-          return '<td>' + item + '</td>';
+        /**
+         * Create html element for each presented schema element.
+         * Each element can be copiead to clipboard.
+         */
+        const schemaElementDescriptionArray = schemaDescriptionJson.elements.map(element => {
+          const link = '@' + domainService + '#' + element.name + '@';
+          const copyIcon = '<i class="far fa-copy" link="' + link + '" data-placement="left" title="Copied!"></i>';
+          const copyElementDiv = '<div class="mb-2">' + copyIcon + '<strong>' + link.toUpperCase() + '</strong></div>';
+          const elementDescriptionDiv = '<div>' + element.description + '</div>';
+          return '<hr/><div>' + copyElementDiv.concat(elementDescriptionDiv) + '</div>';
         }).join('');
-        return '<tr>' + columns + '</tr>';
-      }).join('');
 
-      const table = '<table class="table table-striped table-bordered"><thead><tr>' + tableHead + '</tr></thead><tbody>' + tableBody + '</tbody></table>';
-      
-      commandDescriptionElement.innerHTML = commandDescription.concat(table);
+        schemaDescriptionElement.innerHTML = schemaDescription.concat(schemaElementDescriptionArray);
+
+      } else {
+        schemaDescriptionElement.innerHTML = '<div class="mt-6 mb-6">' + schemaDescriptionString + '</div>';
+      }
+
+      const commandDescriptionString = commandDescriptionElement.innerHTML;
+      const commandDescriptionIsJsonString = isJsonString(commandDescriptionString);
+      if (commandDescriptionIsJsonString) {
+        const commandDescriptionJson = JSON.parse(commandDescriptionString)
+        
+        // Create html element for command description
+        const commandDescription = '<div class="mt-6 mb-6">' + commandDescriptionJson.description + '</div>';
+
+        const tableHead = commandDescriptionJson.headers.map(header => {
+          return '<th>' + header + '</th>';
+        }).join('')
+          .concat('<th>Description</th>');
+
+        const tableBody = commandDescriptionJson.commands.map(command => {
+          const columns = Object.values(command).map(item => {
+            return '<td>' + item + '</td>';
+          }).join('');
+          return '<tr>' + columns + '</tr>';
+        }).join('');
+
+        const table = '<table class="table table-striped table-bordered"><thead><tr>' + tableHead + '</tr></thead><tbody>' + tableBody + '</tbody></table>';
+        
+        commandDescriptionElement.innerHTML = commandDescription.concat(table);
+
+      } else {
+        commandDescriptionElement.innerHTML = '<div class="mt-6 mb-6">' + commandDescriptionString + '</div>';
+      }
 
       // Assign event on click "copy"
       const copyIcons = document.querySelectorAll('i');
@@ -312,6 +278,15 @@
         el.select();
         document.execCommand('copy');
         document.body.removeChild(el);
+      };
+
+      function isJsonString(str) {
+        try {
+          JSON.parse(str);
+        } catch (e) {
+          return false;
+        }
+        return true;
       };
     </script>
   </body>
